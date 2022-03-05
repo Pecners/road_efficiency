@@ -110,3 +110,47 @@ with_sf %>%
   guides(fill = guide_legend(label.position = "left"))
 
 ggsave("maps/not_text_no_bg_map.png", width = 8, height = 8, bg = "transparent")
+
+aw_summed %>%
+  arrange(total_eff) %>%
+  head(5) %>%
+  bind_rows(aw_summed %>%
+              arrange(desc(total_eff)) %>%
+              head(5)) %>%
+  ggplot(aes(reorder(NAME, as.numeric(total_eff)), as.numeric(total_eff))) +
+  geom_segment(aes(xend = reorder(NAME, as.numeric(total_eff)),
+                   x = reorder(NAME, as.numeric(total_eff)),
+                   yend = .80, y = as.numeric(total_eff)),
+               linetype = 2, color = greens[2]) +
+  geom_point(size = 12, color = greens[1]) +
+  geom_text(aes(label = percent(as.numeric(total_eff), 0.5)),
+            size = 3.5, color = "white", family = "gf") +
+  scale_y_continuous(labels = function(x) percent(x, 1)) +
+  theme_minimal() +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.title.position = "plot",
+        axis.text.x = element_text(family = "gf", size = 14, angle = 20,
+                                 color = greens[2]),
+        axis.text.y = element_text(color = greens[2]),
+        text = element_text(family = "gf"),
+        plot.title = element_textbox(family = "gf", size = 24, color = greens[1]),
+        plot.subtitle = element_text(color = greens[1], size = 16),
+        axis.title.y = element_textbox_simple(size = 16, halign = .5, 
+                                              orientation = "left",
+                                              lineheight = .8,
+                                              color = greens[1]),
+        axis.title.x = element_text(size = 16, color = greens[1]),
+        plot.caption = element_textbox_simple(color = alpha(greens[1], .75),
+                                              size = 10,
+                                              margin = margin(t = 5, b = 5)),
+        plot.caption.position = "plot") +
+  labs(y = "Road Efficiency<br><span style='font-size:10pt'>" %+%
+         "(100% is a straight road)</span>",
+       x = "Counties",
+       title = "Wisconsin counties with the curviest and straightest roads",
+       subtitle = "Counties shown represent the top 5 curviest and straightest",
+       caption = "Data from OpenStreetMap, roads limited to Secondary and Tertiary types." %+%
+         "Analysis and graphic by Spencer Schien (@MrPecners).")
+
+ggsave("maps/top_counties_plot.png", device = "png", bg = "white")
