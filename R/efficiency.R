@@ -109,4 +109,4 @@ with_sf %>%
          "Analysis and graphic by Spencer Schien (@MrPecners).") +
   guides(fill = guide_legend(label.position = "left"))
 
-ggsave("maps/not_text_map.png", bg = "white", width = 8, height = 8)
+ggsave("maps/not_text_no_bg_map.png", width = 8, height = 8, bg = "transparent")
