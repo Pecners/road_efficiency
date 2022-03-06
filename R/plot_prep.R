@@ -4,7 +4,6 @@ library(showtext)
 library(MetBrewer)
 library(ggtext)
 
-`%+%` <- function(x, y) paste(x, y)
 
 counties <- tigris::counties(state = "WI")
 
@@ -15,13 +14,11 @@ gl <- l %>%
   filter(name %in% c("Lake Michigan", "Lake Superior")) %>%
   st_union()
 
-co <- st_transform(counties, crs = set_crs)
+co <- st_transform(counties, crs = 4326)
 
 counties_trim <- st_difference(co, gl)
 
-font_add_google("EB Garamond", "ebg")
-font_add_google("Grechen Fuemen", "gf")
-showtext_auto()
+saveRDS(counties_trim, "data/counties_trim.rda")
 
 admin_p <- counties %>%
   ggplot() +

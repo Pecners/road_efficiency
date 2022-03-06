@@ -1,4 +1,4 @@
-eff_start_time1 <- Sys.time()
+#eff_start_time1 <- Sys.time()
 all_wi <- map_df(1:nrow(counties), function(c) {
   one_c <- co[c,] 
   county <- one_c$NAME
@@ -43,12 +43,8 @@ all_wi <- map_df(1:nrow(counties), function(c) {
   
   return(temp_)
 })
-eff_end_time1 <- Sys.time()
-
-comment_time <- eff_end_time - eff_start_time
-
-c <- 1
-x <- 65
+#eff_end_time1 <- Sys.time()
+#comment_time <- eff_end_time - eff_start_time
 
 
 aw_summed <- all_wi %>%
@@ -61,96 +57,3 @@ aw_summed <- all_wi %>%
                            te < 1 ~ "Straightest"))
 
 saveRDS(aw_summed, "data/aw_summed.rda")
-with_sf <- left_join(counties_trim, aw_summed)
-
-greens <- rev(met.brewer("VanGogh3", n = 5)[c(1, 3, 5)])
-
-with_sf %>%
-  ggplot(aes(fill = group)) +
-  geom_sf(color = "white", size = .5) +
-  scale_fill_manual(values = greens, labels = c("Curviest", "", "Straightest")) +
-  theme_void() +
-  theme(plot.title = element_text(family = "gf", size = 30, color = greens[1],
-                                  margin = margin(t = 5, b = 5), hjust = .5),
-        plot.title.position = "plot",
-        plot.subtitle = element_textbox_simple(family = "gf", color = greens[1],
-                                               size = 20, lineheight = .75, 
-                                               fill = alpha(greens[3], .25), 
-                                               r = unit(.05, "cm"), box.colour = greens[1],
-                                               linetype = 1, 
-                                               padding = margin(l = 5,
-                                                                t = 3,
-                                                                b = 3,
-                                                                r = 3)),
-        plot.caption = element_textbox_simple(family = "gf", lineheight = .9, 
-                                              width = unit(7.5, "in"), size = 12,
-                                              margin = margin(b = 5),
-                                              color = alpha(greens[1], .75),
-                                              fill = alpha(greens[3], .1), 
-                                              r = unit(.05, "cm"), 
-                                              box.colour = alpha(greens[1], .75),
-                                              linetype = 1, linewidth = .1,
-                                              padding = margin(rep(3, 4))),
-        legend.position = c(.08, .25),
-        legend.direction = "vertical",
-        legend.title.align = -.5,
-        legend.spacing = unit(10, "cm"),
-        legend.text = element_text(family = "gf", size = 14)) +
-  labs(fill = "") +
-  guides(fill = guide_legend(label.position = "left"))
-
-  labs(title = "A Bend in the Road",
-       subtitle = "Wisconsin's curviest roads are located in the Driftless Area to the west" %+%
-         "and the Northwoods.",
-       fill = "",
-       caption = "Road curvature calculated as the straight-line distance between" %+%
-         "start and end points of a road divided by the actual length of the road." %+%
-         "Data from OpenStreetMap, roads limited to Secondary and Tertiary types." %+%
-         "Analysis and graphic by Spencer Schien (@MrPecners).") +
-  guides(fill = guide_legend(label.position = "left"))
-
-ggsave("maps/not_text_no_bg_map.png", width = 8, height = 8, bg = "transparent")
-
-aw_summed %>%
-  arrange(total_eff) %>%
-  head(5) %>%
-  bind_rows(aw_summed %>%
-              arrange(desc(total_eff)) %>%
-              head(5)) %>%
-  ggplot(aes(reorder(NAME, as.numeric(total_eff)), as.numeric(total_eff))) +
-  geom_segment(aes(xend = reorder(NAME, as.numeric(total_eff)),
-                   x = reorder(NAME, as.numeric(total_eff)),
-                   yend = .80, y = as.numeric(total_eff)),
-               linetype = 2, color = greens[2]) +
-  geom_point(size = 12, color = greens[1]) +
-  geom_text(aes(label = percent(as.numeric(total_eff), 0.5)),
-            size = 3.5, color = "white", family = "gf") +
-  scale_y_continuous(labels = function(x) percent(x, 1)) +
-  theme_minimal() +
-  theme(panel.grid.major.x = element_blank(),
-        panel.grid.minor = element_blank(),
-        plot.title.position = "plot",
-        axis.text.x = element_text(family = "gf", size = 14, angle = 20,
-                                 color = greens[2]),
-        axis.text.y = element_text(color = greens[2]),
-        text = element_text(family = "gf"),
-        plot.title = element_textbox(family = "gf", size = 24, color = greens[1]),
-        plot.subtitle = element_text(color = greens[1], size = 16),
-        axis.title.y = element_textbox_simple(size = 16, halign = .5, 
-                                              orientation = "left",
-                                              lineheight = .8,
-                                              color = greens[1]),
-        axis.title.x = element_text(size = 16, color = greens[1]),
-        plot.caption = element_textbox_simple(color = alpha(greens[1], .75),
-                                              size = 10,
-                                              margin = margin(t = 5, b = 5)),
-        plot.caption.position = "plot") +
-  labs(y = "Road Efficiency<br><span style='font-size:10pt'>" %+%
-         "(100% is a straight road)</span>",
-       x = "Counties",
-       title = "Wisconsin counties with the curviest and straightest roads",
-       subtitle = "Counties shown represent the top 5 curviest and straightest",
-       caption = "Data from OpenStreetMap, roads limited to Secondary and Tertiary types." %+%
-         "Analysis and graphic by Spencer Schien (@MrPecners).")
-
-ggsave("maps/top_counties_plot.png", device = "png", bg = "white")
